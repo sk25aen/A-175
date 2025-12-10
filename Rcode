@@ -1,0 +1,36 @@
+library(tidyverse)
+
+runs <- read_csv("data_70 Star.csv")
+
+runs_pccon <- runs |>
+  mutate(
+    Platform_PCConsole = case_when(
+      platform == "EMU" ~ "PC",
+      platform %in% c("N64", "VC") ~ "Console",
+      TRUE ~ NA_character_
+    )
+  ) |>
+  filter(!is.na(Platform_PCConsole)) |>
+  mutate(Platform_PCConsole = factor(Platform_PCConsole))
+
+summary(runs_pccon$real_time_seconds)
+table(runs_pccon$Platform_PCConsole)
+
+boxplot(real_time_seconds ~ Platform_PCConsole,
+        data = runs_pccon,
+        main = "Real-time speedrun durationby platform",
+        xlab = "Platform (PC vs Console)",
+        ylab = "Real-time duration (seconds)",
+        col = c("lightblue", "pink"),
+        varwidth = TRUE)
+
+means <- aggregate(real_time_seconds ~ Platform_PCConsole,
+                   data = runs_pccon,
+                   FUN = mean)
+
+barplot(means$real_time_seconds,
+        names = means$Platform_PCConsole,
+        main = "Mean real-time duration by platform",
+        xlab = "Platform (PC vs Console)",
+        ylab = "Mean real-time duration (seconds)",
+        col = c("lightblue", "pink"))
